@@ -31,7 +31,8 @@ import resources
 from ImF_dialog import ImageFormatDialog
 import os
 import subprocess
-import time
+from os import listdir
+from os.path import isfile, join
 
 
 class ImageFormat:
@@ -76,8 +77,8 @@ class ImageFormat:
         self.dlg.pushButton_Input.clicked.connect(self.showFileSelectDialogInput)
         self.dlg.pushButton_Output.clicked.connect(self.showFileSelectDialogOutput)
         # self.dlg.button_box_execute.connect(self.run)
-        #self.dlg.inDir.setText('C:/Users/B020736/Documents/tiff2jpg/2014_1km_6252_552.tif')
-        #self.dlg.outDir.setText('C:/Users/B020736/Documents/tiff2jpg/temp2')
+        #self.dlg.inDir.setText('C:\Users\B020736\Documents\\tiff2jpg\\tiffs')
+        #self.dlg.outDir.setText('C:\Users\B020736\Documents\\tiff2jpg\Images')
         self.dlg.radioButtonUTM32.setChecked(True)
 
     # noinspection PyMethodMayBeStatic
@@ -169,10 +170,20 @@ class ImageFormat:
 
         return action
 
+    #def showFileSelectDialogInput(self):
+    #    fname = QFileDialog.getOpenFileName(self.dlg, 'Read File', self.dlg.inDir.text(),
+    #                                        'TIF file (*.tif);;All files (*.*)')
+    #    self.dlg.inDir.setText(fname)
     def showFileSelectDialogInput(self):
-        fname = QFileDialog.getOpenFileName(self.dlg, 'Read File', self.dlg.inDir.text(),
-                                            'TIF file (*.tif);;All files (*.*)')
-        self.dlg.inDir.setText(fname)
+        if self.dlg.checkBoxFolder.isChecked():
+            fname = QFileDialog.getExistingDirectory( None, 'Open Dir', str(self.dlg.inDir.text()))
+            self.dlg.inDir.setText(fname)
+
+
+        elif not self.dlg.checkBoxFolder.isChecked():
+            fname = QFileDialog.getOpenFileName(self.dlg, 'Read File', self.dlg.inDir.text(),'TIF file (*.tif);;All files (*.*)')
+            self.dlg.inDir.setText(fname)
+
 
     def showFileSelectDialogOutput(self):
         fname = QFileDialog.getExistingDirectory()
@@ -209,94 +220,152 @@ class ImageFormat:
         # See if OK was pressed
         if result:
             outpath = str(self.dlg.outDir.text())
-            tiffname = os.path.basename(os.path.normpath(self.dlg.inDir.text()))
-            truncname = os.path.splitext(tiffname)[0]
             tempoutpath = str.replace(outpath, "/", "\\")
             scriptoutpath = tempoutpath + "\\Images"
-
             if self.dlg.radioButtonUTM32.isChecked():
                 EPSG = "25832"
 
             if self.dlg.radioButtonUTM33.isChecked():
                 EPSG = "25833"
 
-            if self.dlg.checkBoxTiffJpeg.isChecked():
-                with open(self.dlg.outDir.text() + "\\" + "TiffJpeg" + ".bat", "a") as bat_file:
-                    bat_file.write(
-                        "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Images \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" +"\" " + "-b 1 -b 2 -b 3 -of GTIFF -a_srs EPSG:" + EPSG + " -co TFW=YES -co PROFILE=BASELINE -co COMPRESS=JPEG -co JPEG_QUALITY=85 -co PHOTOMETRIC=RGB -co TILED=YES " + self.dlg.inDir.text() + " Images/" + tiffname + "\n" + "DEL TiffJpeg.bat")
+            if self.dlg.checkBoxFolder.isChecked():
+                path = self.dlg.inDir.text()
+                onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
+                filenr = 0
+                for f in onlyfiles:
+                    filenr += 1
+                    tiffname = f
+                    truncname = os.path.splitext(tiffname)[0]
+                    if self.dlg.checkBoxTiffJpeg.isChecked():
+                        with open(self.dlg.outDir.text() + "\\" + "TiffJpeg" + str(filenr) + ".bat", "a") as bat_file:
+                            bat_file.write(
+                                "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Images \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" +"\" " + "-b 1 -b 2 -b 3 -of GTIFF -a_srs EPSG:" + EPSG + " -co TFW=YES -co PROFILE=BASELINE -co COMPRESS=JPEG -co JPEG_QUALITY=85 -co PHOTOMETRIC=RGB -co TILED=YES " + self.dlg.inDir.text() + "\\" + tiffname + " Images/" + tiffname + "\n" + "DEL TiffJpeg"+ str(filenr) + ".bat")
 
-                with open(self.dlg.outDir.text() + "\\" + "Run1" + ".bat", "a") as bat_file:
-                    bat_file.write(
-                        "cd " + self.dlg.outDir.text() + "\n" + "wscript.exe \"" + os.path.dirname(__file__) + "\invisible.vbs\" \"TiffJpeg.bat\"" + "\n" + "DEL Run1.bat")
+                        with open(self.dlg.outDir.text() + "\\" + "Run"+ str(filenr) + ".bat", "a") as bat_file:
+                            bat_file.write(
+                                "cd " + self.dlg.outDir.text() + "\n" + "wscript.exe \"" + os.path.dirname(__file__) + "\invisible.vbs\" \"TiffJpeg"+str(filenr)+".bat\"" + "\n" + "DEL Run"+str(filenr)+".bat")
 
-                os.system(tempoutpath + "\Run1.bat")
-                #if self.dlg.checkBox_openwin.isChecked():
-                #    subprocess.call("explorer " + scriptoutpath, shell=True)
+                        os.system(tempoutpath + "\Run"+str(filenr)+".bat")
 
-            if self.dlg.checkBoxRawtiff.isChecked():
-                with open(self.dlg.outDir.text()+"\\"+ "Rawtiff" +".bat", "a") as bat_file:
-                    bat_file.write("set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Images \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" +"\" " + "-b 1 -b 2 -b 3 -b 4 -a_srs EPSG:" + EPSG + " -of GTIFF -scale -co TFW=YES -co TILED=YES -co PHOTOMETRIC=RGB -co BIGTIFF=IF_NEEDED -co COMPRESS=NONE -co ALPHA=UNSPECIFIED " + self.dlg.inDir.text() + " Images/" + truncname +".tiff" + "\n" + "DEL Rawtiff.bat")
+                    if self.dlg.checkBoxRawtiff.isChecked():
+                        with open(self.dlg.outDir.text() + "\\" + "Rawtiff" + str(filenr) + ".bat", "a") as bat_file:
+                            bat_file.write(
+                                "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Images \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -b 4 -a_srs EPSG:" + EPSG + " -of GTIFF -scale -co TFW=YES -co TILED=YES -co PHOTOMETRIC=RGB -co BIGTIFF=IF_NEEDED -co COMPRESS=NONE -co ALPHA=UNSPECIFIED " + self.dlg.inDir.text() + "\\" + tiffname + " Images/" + truncname + ".tiff" + "\n" + "DEL Rawtiff"+str(filenr)+".bat")
 
-                with open(self.dlg.outDir.text() + "\\" + "Run2" + ".bat", "a") as bat_file:
-                    bat_file.write(
-                        "cd " + self.dlg.outDir.text() + "\n" + "wscript.exe \"" + os.path.dirname(__file__) + "\invisible.vbs\" \"Rawtiff.bat\"" + "\n" + "DEL Run2.bat")
+                        with open(self.dlg.outDir.text() + "\\" + "Run2" +str(filenr)+ ".bat", "a") as bat_file:
+                            bat_file.write(
+                                "cd " + self.dlg.outDir.text() + "\n" + "wscript.exe \"" + os.path.dirname(__file__) + "\invisible.vbs\" \"Rawtiff"+str(filenr)+".bat\"" + "\n" + "DEL Run2"+str(filenr)+".bat")
 
-                os.system(tempoutpath + "\Run2.bat")
-                #if self.dlg.checkBox_openwin.isChecked():
-                #    subprocess.call("explorer " + scriptoutpath, shell=True)
+                        os.system(tempoutpath + "\Run2"+str(filenr)+".bat")
 
-            if self.dlg.checkBoxJpeg.isChecked():
-                with open(self.dlg.outDir.text() + "\\" + "Jpeg" + ".bat", "a") as bat_file:
-                    bat_file.write("set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Images \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" +"\" " + " -b 1 -b 2 -b 3 -a_srs EPSG:25832 -of JPEG -scale -co worldfile=yes " + self.dlg.inDir.text() + " Images/" + truncname + ".jpg" + "\n" + "DEL Jpeg.bat")
+                    if self.dlg.checkBoxJpeg.isChecked():
+                        with open(self.dlg.outDir.text() + "\\" + "Jpeg" +str(filenr)+ ".bat", "a") as bat_file:
+                            bat_file.write(
+                                "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Images \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + " -b 1 -b 2 -b 3 -a_srs EPSG:25832 -of JPEG -scale -co worldfile=yes " + self.dlg.inDir.text() + "\\" + tiffname + " Images/" + truncname + ".jpg" + "\n" + "DEL Jpeg"+str(filenr)+".bat")
 
-                with open(self.dlg.outDir.text() + "\\" + "Run3" + ".bat", "a") as bat_file:
-                    bat_file.write(
-                        "cd " + self.dlg.outDir.text() + "\n" + "wscript.exe \"" + os.path.dirname(__file__) + "\invisible.vbs\" \"Jpeg.bat\"" + "\n" + "DEL Run3.bat")
+                        with open(self.dlg.outDir.text() + "\\" + "Run3" +str(filenr)+ ".bat", "a") as bat_file:
+                            bat_file.write(
+                                "cd " + self.dlg.outDir.text() + "\n" + "wscript.exe \"" + os.path.dirname(__file__) + "\invisible.vbs\" \"Jpeg"+str(filenr)+".bat\"" + "\n" + "DEL Run3"+str(filenr)+".bat")
 
-                os.system(tempoutpath + "\Run3.bat")
-                #os.remove(tempoutpath + "\Jpeg.bat")
-                #if self.dlg.checkBox_openwin.isChecked():
-                #    subprocess.call("explorer " + scriptoutpath, shell=True)
+                        os.system(tempoutpath + "\Run3"+str(filenr)+".bat")
 
-            if self.dlg.checkBoxJpeg2000.isChecked():
-                with open(self.dlg.outDir.text() + "\\" + "Jpeg2000" + ".bat", "a") as bat_file:
-                    bat_file.write(
-                        "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Images \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" +"\" " + "-b 1 -b 2 -b 3 -a_srs EPSG:25832 -of JP2OpenJPEG -scale " + self.dlg.inDir.text() + " Images/" + truncname + ".jp2" + "\n" + "DEL Jpeg2000.bat")
+                    if self.dlg.checkBoxJpeg2000.isChecked():
+                        with open(self.dlg.outDir.text() + "\\" + "Jpeg2000" +str(filenr)+ ".bat", "a") as bat_file:
+                            bat_file.write(
+                                "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Images \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -a_srs EPSG:25832 -of JP2OpenJPEG -scale " + self.dlg.inDir.text() + "\\" + tiffname + " Images/" + truncname + ".jp2" + "\n" + "DEL Jpeg2000"+str(filenr)+".bat")
 
-                with open(self.dlg.outDir.text() + "\\" + "Run4" + ".bat", "a") as bat_file:
-                    bat_file.write(
-                        "cd " + self.dlg.outDir.text() + "\n" + "wscript.exe \"" + os.path.dirname(__file__) + "\invisible.vbs\" \"Jpeg2000.bat\"" + "\n" + "DEL Run4.bat")
+                        with open(self.dlg.outDir.text() + "\\" + "Run4" +str(filenr)+ ".bat", "a") as bat_file:
+                            bat_file.write(
+                                "cd " + self.dlg.outDir.text() + "\n" + "wscript.exe \"" + os.path.dirname(__file__) + "\invisible.vbs\" \"Jpeg2000"+str(filenr)+".bat\"" + "\n" + "DEL Run4"+str(filenr)+".bat")
 
-                os.system(tempoutpath + "\Run4.bat")
-                #os.remove(tempoutpath + "\Run.bat")
+                        os.system(tempoutpath + "\Run4"+str(filenr)+".bat")
 
-                #os.remove(tempoutpath + "\Jpeg2000.bat")
-                #if self.dlg.checkBox_openwin.isChecked():
-                #    subprocess.call("explorer " + scriptoutpath, shell=True)
+                    if self.dlg.checkBoxGDAL.isChecked():
+                        with open(self.dlg.outDir.text() + "\\" + "GDAL_overlay" +str(filenr)+ ".bat", "a") as bat_file:
+                            bat_file.write(
+                                "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Images \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -of GTIFF -a_srs EPSG:25832 -co TFW=YES -co PROFILE=BASELINE -co COMPRESS=JPEG -co JPEG_QUALITY=85 -co PHOTOMETRIC=YCBCR -co TILED=YES " + self.dlg.inDir.text() + "\\" + tiffname + " Images/" + tiffname + "\n" +
+                                "cd Images" + "\n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdalbuildvrt.exe" + "\" " + truncname + ".vrt " + truncname + ".tif " + "\n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdaladdo.exe" + "\" " + truncname + ".vrt " "-r average -ro --config GDAL_CACHEMAX 900 --config COMPRESS_OVERVIEW JPEG --config JPEG_QUALITY_OVERVIEW 85 --config PHOTOMETRIC_OVERVIEW YCBCR --config INTERLEAVE_OVERVIEW PIXEL --config BIGTIFF_OVERVIEW YES 2 4 10 25 50 100 200 500 1000" + "\n" +
+                                "Del *.vrt" + "\n" + "rename " + truncname + ".vrt.ovr " + truncname + ".tif.vrt" + "\n" + "cd .." + "\n" + "DEL GDAL_overlay"+str(filenr)+".bat")
 
-            if self.dlg.checkBoxGDAL.isChecked():
-                with open(self.dlg.outDir.text() + "\\" + "GDAL_overlay" + ".bat", "a") as bat_file:
-                    bat_file.write(
-                        "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Images \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" +"\" " + "-b 1 -b 2 -b 3 -of GTIFF -a_srs EPSG:25832 -co TFW=YES -co PROFILE=BASELINE -co COMPRESS=JPEG -co JPEG_QUALITY=85 -co PHOTOMETRIC=YCBCR -co TILED=YES " + self.dlg.inDir.text() + " Images/" + tiffname + "\n" +
-                        "cd Images" + "\n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdalbuildvrt.exe" +"\" " + truncname + ".vrt " + truncname + ".tif " + "\n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdaladdo.exe" +"\" " + truncname + ".vrt " "-r average -ro --config GDAL_CACHEMAX 900 --config COMPRESS_OVERVIEW JPEG --config JPEG_QUALITY_OVERVIEW 85 --config PHOTOMETRIC_OVERVIEW YCBCR --config INTERLEAVE_OVERVIEW PIXEL --config BIGTIFF_OVERVIEW YES 2 4 10 25 50 100 200 500 1000" + "\n" +
-                        "Del *.vrt" + "\n" +
-                        "rename " + truncname + ".vrt.ovr " + truncname + ".tif.vrt" + "\n" + "cd .." + "\n" + "DEL GDAL_overlay.bat")
+                        with open(self.dlg.outDir.text() + "\\" + "Run5" +str(filenr)+ ".bat", "a") as bat_file:
+                            bat_file.write(
+                                "cd " + self.dlg.outDir.text() + "\n" + "wscript.exe \"" + os.path.dirname(__file__) + "\invisible.vbs\" \"GDAL_overlay"+str(filenr)+".bat\"" + "\n" + "DEL Run5"+str(filenr)+".bat")
 
-                with open(self.dlg.outDir.text() + "\\" + "Run5" + ".bat", "a") as bat_file:
-                    bat_file.write(
-                        "cd " + self.dlg.outDir.text() + "\n" + "wscript.exe \"" + os.path.dirname(__file__) + "\invisible.vbs\" \"GDAL_overlay.bat\"" + "\n" + "DEL Run5.bat")
+                        os.system(tempoutpath + "\Run5"+str(filenr)+".bat")
 
-                os.system(tempoutpath + "\Run5.bat")
-                #os.remove(tempoutpath + "\GDAL_overlay.bat")
-                #if self.dlg.checkBox_openwin.isChecked():
-                #    subprocess.call("explorer " + scriptoutpath, shell=True)
+                    if self.dlg.checkBox_openwin.isChecked():
+                        subprocess.call("explorer " + scriptoutpath, shell=True)
 
-            if self.dlg.checkBox_openwin.isChecked():
-                subprocess.call("explorer " + scriptoutpath, shell=True)
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            pass
+            if not self.dlg.checkBoxFolder.isChecked():
+                outpath = str(self.dlg.outDir.text())
+                tiffname = os.path.basename(os.path.normpath(self.dlg.inDir.text()))
+                truncname = os.path.splitext(tiffname)[0]
+                tempoutpath = str.replace(outpath, "/", "\\")
+                scriptoutpath = tempoutpath + "\\Images"
 
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            pass
+                if self.dlg.checkBoxTiffJpeg.isChecked():
+                    with open(self.dlg.outDir.text() + "\\" + "TiffJpeg" + ".bat", "a") as bat_file:
+                        bat_file.write(
+                            "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Images \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -of GTIFF -a_srs EPSG:" + EPSG + " -co TFW=YES -co PROFILE=BASELINE -co COMPRESS=JPEG -co JPEG_QUALITY=85 -co PHOTOMETRIC=RGB -co TILED=YES " + self.dlg.inDir.text() + " Images/" + tiffname + "\n" + "DEL TiffJpeg.bat")
+
+                    with open(self.dlg.outDir.text() + "\\" + "Run1" + ".bat", "a") as bat_file:
+                        bat_file.write(
+                            "cd " + self.dlg.outDir.text() + "\n" + "wscript.exe \"" + os.path.dirname(__file__) + "\invisible.vbs\" \"TiffJpeg.bat\"" + "\n" + "DEL Run1.bat")
+
+                    os.system(tempoutpath + "\Run1.bat")
+
+                if self.dlg.checkBoxRawtiff.isChecked():
+                    with open(self.dlg.outDir.text() + "\\" + "Rawtiff" + ".bat", "a") as bat_file:
+                        bat_file.write(
+                            "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Images \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -b 4 -a_srs EPSG:" + EPSG + " -of GTIFF -scale -co TFW=YES -co TILED=YES -co PHOTOMETRIC=RGB -co BIGTIFF=IF_NEEDED -co COMPRESS=NONE -co ALPHA=UNSPECIFIED " + self.dlg.inDir.text() + " Images/" + truncname + ".tiff" + "\n" + "DEL Rawtiff.bat")
+
+                    with open(self.dlg.outDir.text() + "\\" + "Run2" + ".bat", "a") as bat_file:
+                        bat_file.write(
+                            "cd " + self.dlg.outDir.text() + "\n" + "wscript.exe \"" + os.path.dirname(__file__) + "\invisible.vbs\" \"Rawtiff.bat\"" + "\n" + "DEL Run2.bat")
+
+                    os.system(tempoutpath + "\Run2.bat")
+
+                if self.dlg.checkBoxJpeg.isChecked():
+                    with open(self.dlg.outDir.text() + "\\" + "Jpeg" + ".bat", "a") as bat_file:
+                        bat_file.write(
+                            "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Images \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + " -b 1 -b 2 -b 3 -a_srs EPSG:25832 -of JPEG -scale -co worldfile=yes " + self.dlg.inDir.text() + " Images/" + truncname + ".jpg" + "\n" + "DEL Jpeg.bat")
+
+                    with open(self.dlg.outDir.text() + "\\" + "Run3" + ".bat", "a") as bat_file:
+                        bat_file.write(
+                            "cd " + self.dlg.outDir.text() + "\n" + "wscript.exe \"" + os.path.dirname(__file__) + "\invisible.vbs\" \"Jpeg.bat\"" + "\n" + "DEL Run3.bat")
+
+                    os.system(tempoutpath + "\Run3.bat")
+
+                if self.dlg.checkBoxJpeg2000.isChecked():
+                    with open(self.dlg.outDir.text() + "\\" + "Jpeg2000" + ".bat", "a") as bat_file:
+                        bat_file.write(
+                            "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Images \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -a_srs EPSG:25832 -of JP2OpenJPEG -scale " + self.dlg.inDir.text() + " Images/" + truncname + ".jp2" + "\n" + "DEL Jpeg2000.bat")
+
+                    with open(self.dlg.outDir.text() + "\\" + "Run4" + ".bat", "a") as bat_file:
+                        bat_file.write(
+                            "cd " + self.dlg.outDir.text() + "\n" + "wscript.exe \"" + os.path.dirname(__file__) + "\invisible.vbs\" \"Jpeg2000.bat\"" + "\n" + "DEL Run4.bat")
+
+                    os.system(tempoutpath + "\Run4.bat")
+
+                if self.dlg.checkBoxGDAL.isChecked():
+                    with open(self.dlg.outDir.text() + "\\" + "GDAL_overlay" + ".bat", "a") as bat_file:
+                        bat_file.write(
+                            "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Images \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -of GTIFF -a_srs EPSG:25832 -co TFW=YES -co PROFILE=BASELINE -co COMPRESS=JPEG -co JPEG_QUALITY=85 -co PHOTOMETRIC=YCBCR -co TILED=YES " + self.dlg.inDir.text() + " Images/" + tiffname + "\n" +
+                                "cd Images" + "\n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdalbuildvrt.exe" + "\" " + truncname + ".vrt " + truncname + ".tif " + "\n" + "\"" + os.path.dirname(
+                                os.path.realpath(sys.argv[0])) + "\gdaladdo.exe" + "\" " + truncname + ".vrt " "-r average -ro --config GDAL_CACHEMAX 900 --config COMPRESS_OVERVIEW JPEG --config JPEG_QUALITY_OVERVIEW 85 --config PHOTOMETRIC_OVERVIEW YCBCR --config INTERLEAVE_OVERVIEW PIXEL --config BIGTIFF_OVERVIEW YES 2 4 10 25 50 100 200 500 1000" + "\n" +
+                                "Del *.vrt" + "\n" + "rename " + truncname + ".vrt.ovr " + truncname + ".tif.vrt" + "\n" + "cd .." + "\n" + "DEL GDAL_overlay.bat")
+
+                    with open(self.dlg.outDir.text() + "\\" + "Run5" + ".bat", "a") as bat_file:
+                        bat_file.write(
+                            "cd " + self.dlg.outDir.text() + "\n" + "wscript.exe \"" + os.path.dirname(__file__) + "\invisible.vbs\" \"GDAL_overlay.bat\"" + "\n" + "DEL Run5.bat")
+
+                    os.system(tempoutpath + "\Run5.bat")
+
+
+                if self.dlg.checkBox_openwin.isChecked():
+                    subprocess.call("explorer " + scriptoutpath, shell=True)
+                        # Do something useful here - delete the line containing pass and
+                        # substitute with your code.
+                    pass
+
+                    pass

@@ -150,6 +150,19 @@
      <string>...</string>
     </property>
    </widget>
+   <widget class="QCheckBox" name="checkBoxFolder">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>60</y>
+      <width>141</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Choose folder of images</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QDialogButtonBox" name="button_box_execute">
    <property name="geometry">

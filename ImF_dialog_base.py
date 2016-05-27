@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ImF_dialog_base.ui'
 #
-# Created: Thu May 19 13:58:58 2016
+# Created: Wed May 25 09:53:21 2016
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -69,6 +69,9 @@ class Ui_ImageFormatDialogBase(object):
         self.pushButton_Input = QtGui.QPushButton(self.groupBox_1)
         self.pushButton_Input.setGeometry(QtCore.QRect(320, 30, 31, 21))
         self.pushButton_Input.setObjectName(_fromUtf8("pushButton_Input"))
+        self.checkBoxFolder = QtGui.QCheckBox(self.groupBox_1)
+        self.checkBoxFolder.setGeometry(QtCore.QRect(20, 60, 141, 17))
+        self.checkBoxFolder.setObjectName(_fromUtf8("checkBoxFolder"))
         self.button_box_execute = QtGui.QDialogButtonBox(ImageFormatDialogBase)
         self.button_box_execute.setGeometry(QtCore.QRect(40, 500, 341, 32))
         self.button_box_execute.setOrientation(QtCore.Qt.Horizontal)
@@ -106,6 +109,7 @@ class Ui_ImageFormatDialogBase(object):
         self.inDir.setToolTip(_translate("ImageFormatDialogBase", "<html><head/><body><p><br/></p></body></html>", None))
         self.inDir.setWhatsThis(_translate("ImageFormatDialogBase", "<html><head/><body><p>Select a single file. All files in dir will be used.</p></body></html>", None))
         self.pushButton_Input.setText(_translate("ImageFormatDialogBase", "...", None))
+        self.checkBoxFolder.setText(_translate("ImageFormatDialogBase", "Choose folder of images", None))
         self.groupBox_3.setTitle(_translate("ImageFormatDialogBase", "Coordinate system", None))
         self.radioButtonUTM32.setText(_translate("ImageFormatDialogBase", "UTM32  EPSG: 25832", None))
         self.radioButtonUTM33.setText(_translate("ImageFormatDialogBase", "UTM33  EPSG: 25833", None))
