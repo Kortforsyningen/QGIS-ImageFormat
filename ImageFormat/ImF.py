@@ -282,20 +282,20 @@ class ImageFormat:
 
                     os.system(tempoutpath + "\Run2"+str(filenr)+".bat")
 
-                if self.dlg.checkBoxJpeg2000.isChecked():
-                    with open(self.dlg.outDir.text() + "\\" + "Jpeg2000" +str(filenr)+ ".bat", "a") as bat_file:
-                        bat_file.write(
-                            "REM @ECHO OFF\n" + "set GDAL_CACHEMAX=700\n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Jpeg2000\n" + "SETLOCAL EnableDelayedExpansion\n\n" +
-                            "SET inpath=" + self.dlg.inDir.text() + "\\" + "\n" + "SET outpath=" + self.dlg.outDir.text() + "\Jpeg2000" + "\\" + "\n\n" +
-                            "FOR /F %%i IN ('DIR /B %inpath%*.tif') DO (\n\n" + "    SET infile=%%i\n" + "    SET outfile=!infile:.tif=.jp2!\n\n" +
-                            "    \"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -a_srs EPSG:25832 -of JP2OpenJPEG -scale " +
-							" %inpath%!infile! %outpath%!outfile!" + "\n)\n" + "DEL Jpeg2000"+str(filenr)+".bat")
+                #if self.dlg.checkBoxJpeg2000.isChecked():
+                 #   with open(self.dlg.outDir.text() + "\\" + "Jpeg2000" +str(filenr)+ ".bat", "a") as bat_file:
+                  #      bat_file.write(
+                   #         "REM @ECHO OFF\n" + "set GDAL_CACHEMAX=700\n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Jpeg2000\n" + "SETLOCAL EnableDelayedExpansion\n\n" +
+                    #        "SET inpath=" + self.dlg.inDir.text() + "\\" + "\n" + "SET outpath=" + self.dlg.outDir.text() + "\Jpeg2000" + "\\" + "\n\n" +
+                     #       "FOR /F %%i IN ('DIR /B %inpath%*.tif') DO (\n\n" + "    SET infile=%%i\n" + "    SET outfile=!infile:.tif=.jp2!\n\n" +
+                      #      "    \"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -a_srs EPSG:25832 -of JP2OpenJPEG -scale " +
+						#	" %inpath%!infile! %outpath%!outfile!" + "\n)\n" + "DEL Jpeg2000"+str(filenr)+".bat")
+#
+ #                   with open(self.dlg.outDir.text() + "\\" + "Run3" +str(filenr)+ ".bat", "a") as bat_file:
+  #                      bat_file.write(
+   #                         "cd " + self.dlg.outDir.text() + "\n" + "wscript.exe \"" + os.path.dirname(__file__) + "\invisible.vbs\" \"Jpeg2000"+str(filenr)+".bat\"" + "\n" + "DEL Run3"+str(filenr)+".bat")
 
-                    with open(self.dlg.outDir.text() + "\\" + "Run3" +str(filenr)+ ".bat", "a") as bat_file:
-                        bat_file.write(
-                            "cd " + self.dlg.outDir.text() + "\n" + "wscript.exe \"" + os.path.dirname(__file__) + "\invisible.vbs\" \"Jpeg2000"+str(filenr)+".bat\"" + "\n" + "DEL Run3"+str(filenr)+".bat")
-
-                    os.system(tempoutpath + "\Run3"+str(filenr)+".bat")
+    #                os.system(tempoutpath + "\Run3"+str(filenr)+".bat")
 
                 if self.dlg.checkBoxGDAL.isChecked():
                     with open(self.dlg.outDir.text() + "\\" + "GDAL_overlay" +str(filenr)+ ".bat", "a") as bat_file:
@@ -357,16 +357,16 @@ class ImageFormat:
 
                     os.system(tempoutpath + "\Run3.bat")
 
-                if self.dlg.checkBoxJpeg2000.isChecked():
-                    with open(self.dlg.outDir.text() + "\\" + "Jpeg2000" + ".bat", "a") as bat_file:
-                        bat_file.write(
-                            "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Jpeg2000 \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -a_srs EPSG:25832 -of JP2OpenJPEG -scale " + self.dlg.inDir.text() + " Jpeg2000/" + truncname + ".jp2" + "\n" + "DEL Jpeg2000.bat")
+                #if self.dlg.checkBoxJpeg2000.isChecked():
+                #    with open(self.dlg.outDir.text() + "\\" + "Jpeg2000" + ".bat", "a") as bat_file:
+                #        bat_file.write(
+                #            "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Jpeg2000 \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -a_srs EPSG:25832 -of JP2OpenJPEG -scale " + self.dlg.inDir.text() + " Jpeg2000/" + truncname + ".jp2" + "\n" + "DEL Jpeg2000.bat")
 
-                    with open(self.dlg.outDir.text() + "\\" + "Run4" + ".bat", "a") as bat_file:
-                        bat_file.write(
-                            "cd " + self.dlg.outDir.text() + "\n" + "wscript.exe \"" + os.path.dirname(__file__) + "\invisible.vbs\" \"Jpeg2000.bat\"" + "\n" + "DEL Run4.bat")
+                 #   with open(self.dlg.outDir.text() + "\\" + "Run4" + ".bat", "a") as bat_file:
+                 #       bat_file.write(
+                 #           "cd " + self.dlg.outDir.text() + "\n" + "wscript.exe \"" + os.path.dirname(__file__) + "\invisible.vbs\" \"Jpeg2000.bat\"" + "\n" + "DEL Run4.bat")
 
-                    os.system(tempoutpath + "\Run4.bat")
+                  #  os.system(tempoutpath + "\Run4.bat")
 
                 if self.dlg.checkBoxGDAL.isChecked():
                     with open(self.dlg.outDir.text() + "\\" + "GDAL_overlay" + ".bat", "a") as bat_file:

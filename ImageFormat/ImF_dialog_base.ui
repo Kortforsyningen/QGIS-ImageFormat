@@ -57,13 +57,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="checkBoxJpeg2000">
-       <property name="text">
-        <string>Jpeg2000 with XML</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QCheckBox" name="checkBoxGDAL">
        <property name="text">
         <string>GeoTiff with GDAL library file (vrt) (made from ovr-file)</string>
