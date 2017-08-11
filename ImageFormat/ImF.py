@@ -81,6 +81,8 @@ class ImageFormat:
         #self.dlg.inDir.setText('C:\Users\B020736\Documents\\tiff2jpg\\tiffs')
         #self.dlg.outDir.setText('C:\Users\B020736\Documents\\tiff2jpg\Images')
         self.dlg.radioButtonUTM32.setChecked(True)
+        global gdalname
+        gdalname = os.getcwd()
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
