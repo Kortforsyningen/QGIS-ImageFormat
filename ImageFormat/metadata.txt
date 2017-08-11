@@ -10,9 +10,11 @@
 name=ImF
 qgisMinimumVersion=2.0
 description=Image Formatter
-version=0.1
+version=0.2
 author=Mafal / sdfe
 email=mafal@sdfe.dk
+
+# update version 0.2 : added option to specify path to gdal_translate
 
 about=Format photo's to different formats
 
