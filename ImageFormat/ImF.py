@@ -76,6 +76,7 @@ class ImageFormat:
 
         self.dlg.pushButton_Input.clicked.connect(self.showFileSelectDialogInput)
         self.dlg.pushButton_Output.clicked.connect(self.showFileSelectDialogOutput)
+        self.dlg.pushButton_gdal.clicked.connect(self.showFileSelectDialoggdal)
         # self.dlg.button_box_execute.connect(self.run)
         #self.dlg.inDir.setText('C:\Users\B020736\Documents\\tiff2jpg\\tiffs')
         #self.dlg.outDir.setText('C:\Users\B020736\Documents\\tiff2jpg\Images')
@@ -188,6 +189,9 @@ class ImageFormat:
     def showFileSelectDialogOutput(self):
         fname = QFileDialog.getExistingDirectory()
         self.dlg.outDir.setText(fname)
+    def showFileSelectDialoggdal(self):
+        global gdalname
+        gdalname = QFileDialog.getExistingDirectory()
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
@@ -242,8 +246,8 @@ class ImageFormat:
                             "REM @ECHO OFF\n" + "set GDAL_CACHEMAX=700\n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir TiffJpeg\n" + "SETLOCAL EnableDelayedExpansion\n\n" +
                             "SET inpath="+self.dlg.inDir.text()+"\\" + "\n" + "SET outpath=" + self.dlg.outDir.text() + "\TiffJpeg" + "\\" + "\n" +
                             "FOR /F %%i IN ('DIR /B %inpath%*.tif') DO (\n\n" + "    SET infile=%%i\n" + "    SET outfile=!infile:.tif=.tif!\n\n" +
-                            "    \"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" +"\" " + "-b 1 -b 2 -b 3 -b 4 -of GTIFF -a_srs EPSG:" + EPSG +
-                            " -co COMPRESS=JPEG -co JPEG_QUALITY=85 -co PHOTOMETRIC=RGB -co TILED=YES " + " %inpath%!infile! %outpath%!outfile!" + "\n)\n" + "DEL TiffJpeg"+ str(filenr) + ".bat")
+                            "    \"" + str(gdalname) + "\gdal_translate.exe" +"\" " + "-b 1 -b 2 -b 3 -b 4 -of GTIFF -a_srs EPSG:" + EPSG +
+                            " -co COMPRESS=JPEG -co JPEG_QUALITY=85 -co PHOTOMETRIC=RGB -co TFW=yes -co TILED=YES " + " %inpath%!infile! %outpath%!outfile!" + "\n)\n" + "DEL TiffJpeg"+ str(filenr) + ".bat")
 
                     #with open(self.dlg.outDir.text() + "\\" + "Run"+ str(filenr) + ".bat", "a") as bat_file:
                      #   bat_file.write(
@@ -257,7 +261,7 @@ class ImageFormat:
                             "REM @ECHO OFF\n" + "set GDAL_CACHEMAX=700\n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir RawTiff\n" + "SETLOCAL EnableDelayedExpansion\n\n" +
                             "SET inpath=" + self.dlg.inDir.text() + "\\" + "\n" + "SET outpath=" + self.dlg.outDir.text() + "\RawTiff" + "\\" + "\n\n" +
                             "FOR /F %%i IN ('DIR /B %inpath%*.tif') DO (\n\n" + "    SET infile=%%i\n" + "    SET outfile=!infile:.tif=.tiff!\n\n" +
-                            "    \"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -b 4 -a_srs EPSG:" + EPSG + 
+                            "    \"" + str(gdalname) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -b 4 -a_srs EPSG:" + EPSG +
 							" -of GTIFF -scale -co TFW=YES -co TILED=YES -co PHOTOMETRIC=RGB -co BIGTIFF=IF_NEEDED -co COMPRESS=NONE -co ALPHA=UNSPECIFIED " +
 							" %inpath%!infile! %outpath%!outfile!" + "\n)\n" + "DEL Rawtiff" + str(filenr) + ".bat")
 
@@ -273,7 +277,7 @@ class ImageFormat:
                             "REM @ECHO OFF\n" + "set GDAL_CACHEMAX=700\n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Jpeg\n" + "SETLOCAL EnableDelayedExpansion\n\n" +
                             "SET inpath=" + self.dlg.inDir.text() + "\\" + "\n" + "SET outpath=" + self.dlg.outDir.text() + "\Jpeg" + "\\" + "\n\n" +
                             "FOR /F %%i IN ('DIR /B %inpath%*.tif') DO (\n\n" + "    SET infile=%%i\n" + "    SET outfile=!infile:.tif=.jpeg!\n\n" +
-                            "    \"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + " -b 1 -b 2 -b 3 -b 4 -a_srs EPSG:25832 -of JPEG -scale -co worldfile=yes " +
+                            "    \"" + str(gdalname) + "\gdal_translate.exe" + "\" " + " -b 1 -b 2 -b 3 -b 4 -a_srs EPSG:25832 -of JPEG -scale -co worldfile=yes -co TFW=yes " +
 							" %inpath%!infile! %outpath%!outfile!" + "\n)\n" + "DEL Jpeg"+str(filenr)+".bat")
 
                     #with open(self.dlg.outDir.text() + "\\" + "Run2" +str(filenr)+ ".bat", "a") as bat_file:
@@ -303,9 +307,9 @@ class ImageFormat:
                             "REM @ECHO OFF \n" + "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir TiffJpeg_ovr \n" + "SETLOCAL EnableDelayedExpansion\n\n" + 
 							"SET inpath=" + self.dlg.inDir.text() + "\\" + "\n" + "SET outpath=" + self.dlg.outDir.text() + "\TiffJpeg_ovr" + "\\" + "\n\n" +
                             "FOR /F %%i IN ('DIR /B %inpath%*.tif') DO (\n\n" + "    SET infile=%%i\n" + "    SET outfile=!infile:.tif=.tif!\n" + "    SET vrtfile=!infile:.tif=.vrt!\n\n" +
-							"\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -b 4 -of GTIFF -a_srs EPSG:25832 -co TFW=YES -co COMPRESS=JPEG -co JPEG_QUALITY=85 -co PHOTOMETRIC=RGB -co TILED=YES " + 
-							" %inpath%!infile! %outpath%!outfile!\n\n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdalbuildvrt.exe" + "\" " + "%outpath%!vrtfile! %outpath%!infile!\n" + 
-							"\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdaladdo.exe" + "\" " + "%outpath%!vrtfile! " + "-r average -ro --config GDAL_CACHEMAX 900 --config COMPRESS_OVERVIEW JPEG --config JPEG_QUALITY_OVERVIEW 85 --config PHOTOMETRIC_OVERVIEW RGB --config INTERLEAVE_OVERVIEW PIXEL --config BIGTIFF_OVERVIEW YES 2 4 10 25 50 100 200 500 1000" +
+							"\"" + str(gdalname) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -b 4 -of GTIFF -a_srs EPSG:25832 -co TFW=YES -co COMPRESS=JPEG -co JPEG_QUALITY=85 -co PHOTOMETRIC=RGB -co TILED=YES " +
+							" %inpath%!infile! %outpath%!outfile!\n\n" + "\"" + str(gdalname) + "\gdalbuildvrt.exe" + "\" " + "%outpath%!vrtfile! %outpath%!infile!\n" +
+							"\"" + str(gdalname) + "\gdaladdo.exe" + "\" " + "%outpath%!vrtfile! " + "-r average -ro --config GDAL_CACHEMAX 900 --config COMPRESS_OVERVIEW JPEG --config JPEG_QUALITY_OVERVIEW 85 --config PHOTOMETRIC_OVERVIEW RGB --config INTERLEAVE_OVERVIEW PIXEL --config BIGTIFF_OVERVIEW YES 2 4 10 25 50 100 200 500 1000" +
 							"\n\n" + "DEL %outpath%!vrtfile!\n)\n" + "cd TiffJpeg_ovr\n" + "rename *.vrt.ovr *.\n" + "rename *.vrt *.tif.ovr\n" + " cd ..\n" + "DEL GDAL_overlay.bat") 
 
                     #with open(self.dlg.outDir.text() + "\\" + "Run5" +str(filenr)+ ".bat", "a") as bat_file:
@@ -327,7 +331,7 @@ class ImageFormat:
                 if self.dlg.checkBoxTiffJpeg.isChecked():
                     with open(self.dlg.outDir.text() + "\\" + "TiffJpeg" + ".bat", "a") as bat_file:
                         bat_file.write(
-                            "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir TiffJpeg \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -b 4 -of GTIFF -a_srs EPSG:" + EPSG + " -co TFW=YES -co COMPRESS=JPEG -co JPEG_QUALITY=85 -co PHOTOMETRIC=RGB -co TILED=YES " + self.dlg.inDir.text() + " TiffJpeg/" + tiffname + "\n" + "DEL TiffJpeg.bat")
+                            "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir TiffJpeg \n" + "\"" + str(gdalname) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -b 4 -of GTIFF -a_srs EPSG:" + EPSG + " -co TFW=YES -co COMPRESS=JPEG -co JPEG_QUALITY=85 -co PHOTOMETRIC=RGB -co TILED=YES " + self.dlg.inDir.text() + " TiffJpeg/" + tiffname + "\n" + "DEL TiffJpeg.bat")
 
                     #with open(self.dlg.outDir.text() + "\\" + "Run1" + ".bat", "a") as bat_file:
                     #    bat_file.write(
@@ -338,7 +342,7 @@ class ImageFormat:
                 if self.dlg.checkBoxRawtiff.isChecked():
                     with open(self.dlg.outDir.text() + "\\" + "Rawtiff" + ".bat", "a") as bat_file:
                         bat_file.write(
-                            "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir RawTiff \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -b 4 -a_srs EPSG:" + EPSG + " -of GTIFF -scale -co TFW=YES -co TILED=YES -co PHOTOMETRIC=RGB -co BIGTIFF=IF_NEEDED -co COMPRESS=NONE -co ALPHA=UNSPECIFIED " + self.dlg.inDir.text() + " RawTiff/" + truncname + ".tiff" + "\n" + "DEL Rawtiff.bat")
+                            "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir RawTiff \n" + "\"" + str(gdalname) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -b 4 -a_srs EPSG:" + EPSG + " -of GTIFF -scale -co TFW=YES -co TILED=YES -co PHOTOMETRIC=RGB -co BIGTIFF=IF_NEEDED -co COMPRESS=NONE -co ALPHA=UNSPECIFIED " + self.dlg.inDir.text() + " RawTiff/" + truncname + ".tiff" + "\n" + "DEL Rawtiff.bat")
 
                     #with open(self.dlg.outDir.text() + "\\" + "Run2" + ".bat", "a") as bat_file:
                     #    bat_file.write(
@@ -349,7 +353,7 @@ class ImageFormat:
                 if self.dlg.checkBoxJpeg.isChecked():
                     with open(self.dlg.outDir.text() + "\\" + "Jpeg" + ".bat", "a") as bat_file:
                         bat_file.write(
-                            "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Jpeg \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + " -b 1 -b 2 -b 3 -b 4 -a_srs EPSG:25832 -of JPEG -scale -co worldfile=yes " + self.dlg.inDir.text() + " Jpeg/" + truncname + ".jpg" + "\n" + "DEL Jpeg.bat")
+                            "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir Jpeg \n" + "\"" + str(gdalname) + "\gdal_translate.exe" + "\" " + " -b 1 -b 2 -b 3 -b 4 -a_srs EPSG:25832 -of JPEG -scale -co worldfile=yes " + self.dlg.inDir.text() + " Jpeg/" + truncname + ".jpg" + "\n" + "DEL Jpeg.bat")
 
                    # with open(self.dlg.outDir.text() + "\\" + "Run3" + ".bat", "a") as bat_file:
                    #     bat_file.write(
@@ -371,9 +375,9 @@ class ImageFormat:
                 if self.dlg.checkBoxGDAL.isChecked():
                     with open(self.dlg.outDir.text() + "\\" + "GDAL_overlay" + ".bat", "a") as bat_file:
                         bat_file.write(
-                            "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir TiffJpeg_ovr \n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -b 4 -of GTIFF -a_srs EPSG:25832 -co TFW=YES -co COMPRESS=JPEG -co JPEG_QUALITY=85 -co PHOTOMETRIC=RGB -co TILED=YES " + self.dlg.inDir.text() + " TiffJpeg_ovr/" + tiffname + "\n" +
-                                "cd TiffJpeg_ovr" + "\n" + "\"" + os.path.dirname(os.path.realpath(sys.argv[0])) + "\gdalbuildvrt.exe" + "\" " + truncname + ".vrt " + truncname + ".tif " + "\n" + "\"" + os.path.dirname(
-                                os.path.realpath(sys.argv[0])) + "\gdaladdo.exe" + "\" " + truncname + ".vrt " "-r average -ro --config GDAL_CACHEMAX 900 --config COMPRESS_OVERVIEW JPEG --config JPEG_QUALITY_OVERVIEW 85 --config PHOTOMETRIC_OVERVIEW RGB --config INTERLEAVE_OVERVIEW PIXEL --config BIGTIFF_OVERVIEW YES 2 4 10 25 50 100 200 500 1000" + "\n" +
+                            "set GDAL_CACHEMAX=700 \n" + "cd " + self.dlg.outDir.text() + "\n" + "mkdir TiffJpeg_ovr \n" + "\"" + str(gdalname) + "\gdal_translate.exe" + "\" " + "-b 1 -b 2 -b 3 -b 4 -of GTIFF -a_srs EPSG:25832 -co TFW=YES -co COMPRESS=JPEG -co JPEG_QUALITY=85 -co PHOTOMETRIC=RGB -co TILED=YES " + self.dlg.inDir.text() + " TiffJpeg_ovr/" + tiffname + "\n" +
+                                "cd TiffJpeg_ovr" + "\n" + "\"" + str(gdalname) + "\gdalbuildvrt.exe" + "\" " + truncname + ".vrt " + truncname + ".tif " + "\n" + "\"" +
+                                str(gdalname) + "\gdaladdo.exe" + "\" " + truncname + ".vrt " "-r average -ro --config GDAL_CACHEMAX 900 --config COMPRESS_OVERVIEW JPEG --config JPEG_QUALITY_OVERVIEW 85 --config PHOTOMETRIC_OVERVIEW RGB --config INTERLEAVE_OVERVIEW PIXEL --config BIGTIFF_OVERVIEW YES 2 4 10 25 50 100 200 500 1000" + "\n" +
                                 "Del *.vrt" + "\n" + "rename " + truncname + ".vrt.ovr " + truncname + ".tif.ovr" + "\n" + "cd .." + "\n" + "DEL GDAL_overlay.bat")
 
                    # with open(self.dlg.outDir.text() + "\\" + "Run5" + ".bat", "a") as bat_file:
